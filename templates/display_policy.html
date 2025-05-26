@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Hospital Admin - View Policies</title>
+    <style>
+         * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+        }
+
+        header {
+            background-color: #4086cd;
+            padding: 15px;
+            color: white;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: fixed;
+            top: 0;
+            width: 100%;
+            z-index: 1000;
+        }
+
+        .header-right {
+            margin-right: 20px;
+        }
+
+        .header-right a {
+            color: white;
+            text-decoration: none;
+            margin-left: 20px;
+            font-size: 18px;
+        }
+
+        .profile-settings {
+            display: flex;
+            align-items: center;
+        }
+
+        .profile-settings .btn {
+            margin-left: 10px;
+            padding: 0.5rem 1rem;
+            background-color: white;
+            border: none;
+            color: #3a7bd5;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .container {
+            padding: 30px;
+            margin-left: 220px;
+            margin-top: 80px;
+        }
+
+        .sidebar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 200px;
+            height: 100%;
+            background-color: #4086cd;
+            padding-top: 80px;
+        }
+
+        .sidebar a {
+            display: block;
+            color: white;
+            padding: 15px;
+            text-decoration: none;
+            font-size: 16px;
+        }
+
+        .sidebar a:hover {
+            background-color: #f1fffc;
+            color: rgba(0, 0, 0, 0.744);
+            font-weight: bold;
+        }
+
+        .overview-panel {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .policy-box {
+            background: white;
+            border-left: 5px solid #3a7bd5;
+            padding: 15px;
+            margin-bottom: 15px;
+            cursor: pointer;
+            transition: background 0.3s ease;
+        }
+        .policy-box:hover {
+            background: #f0f0f0;
+        }
+        .policy-title {
+            font-weight: bold;
+            font-size: 18px;
+        }
+        .policy-details {
+            display: none;
+            margin-top: 10px;
+            padding-top: 10px;
+            border-top: 1px solid #ccc;
+        }
+        .policy-details p {
+            margin: 5px 0;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        Hospital Admin
+        <div class="header-right">
+            <a href="#">Profile</a>
+            <a href="#">Logout</a>
+        </div>
+    </header>
+
+    <!-- Sidebar Menu -->
+    <div class="sidebar">
+        <a href="{{url_for('hospitaladmin_dashboard')}}">Dashboard</a>
+        <a href="{{ url_for('data_entry') }}">Enter Data</a>
+        <a href="{{ url_for('update_data') }}">Update Data</a>
+        <a href="{{ url_for('program_entry') }}">Program Entry</a>
+        
+    </div>
+    <div class="container">
+        {% for policy in policies %}
+        <div class="policy-box" onclick="toggleDetails(this)">
+            <div class="policy-title">{{ policy.program_name }}</div>
+            <div class="policy-details">
+                <p><strong>Program ID:</strong> {{ policy.program_id }}</p>
+                <p><strong>Proposed Date:</strong> {{ policy.proposed_date }}</p>
+                <p><strong>Start Date:</strong> {{ policy.start_date }}</p>
+                <p><strong>End Date:</strong> {{ policy.end_date }}</p>
+                <p><strong>Description:</strong> {{ policy.description }}</p>
+                <p><strong>Key Area:</strong> {{ policy.key_area }}</p>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <script>
+        function toggleDetails(box) {
+            const details = box.querySelector('.policy-details');
+            details.style.display = details.style.display === 'block' ? 'none' : 'block';
+        }
+    </script>
+</body>
+</html>

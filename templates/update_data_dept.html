@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Update Patient Data</title>
+    <style>
+               * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        /* Body Styling */
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f8ff; /* Light vibrant background */
+            display: flex;
+        }
+
+        .sidebar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 250px;
+            height: 100%;
+            background-color: #4086cd;
+            padding-top: 80px; /* Aligns with the header */
+            box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+            z-index: 10;
+        }
+        .sidebar a {
+            display: block;
+            color: white;
+            padding: 15px 20px;
+            text-decoration: none;
+            font-size: 18px;
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+        .sidebar a:hover {
+            background-color: #f1fffc;
+            color: rgba(0, 0, 0, 0.744);
+            font-weight: bold;
+        }
+        /* Top Navigation Bar Styling */
+        .topbar {
+            width: calc(100% - 250px); /* Full width minus sidebar */
+            background-color: #4086cd; /* Darker blue for top bar */
+            padding: 10px 20px;
+            position: fixed;
+            top: 0;
+            left: 250px; /* Align with sidebar */
+            display: flex;
+            justify-content: flex-start;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            z-index: 10;
+        }
+
+       /* make sure the profile container is the positioning context */
+.topbar .profile {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-left: auto;
+  margin-right: 30px;
+  font: 16px "Segoe UI", Tahoma, sans-serif;
+  color: #fff;
+  cursor: pointer;
+  z-index: 50;
+}
+
+/* the hidden dropdown panel */
+.topbar .profile-info {
+  display: none;
+  position: absolute;
+  top: calc(100% + 8px);   /* just below the profile link */
+  right: 0;                /* aligned to its right edge */
+  min-width: 220px;
+  padding: 16px;
+  background: #fff;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  font: 14px "Verdana", Geneva, sans-serif;
+  color: #333;
+  z-index: 100;
+}
+
+/* each line in the dropdown */
+.topbar .profile-info p {
+  margin: 6px 0;
+}
+
+/* emphasize the labels */
+.topbar .profile-info strong {
+  width: 80px;
+  display: inline-block;
+}
+
+/* add a little hover effect on the profile link */
+.topbar .profile:hover a span {
+  text-decoration: underline;
+}
+
+        .topbar .logout {
+    color: white;
+    font-size: 16px;
+    cursor: pointer;
+    text-decoration: none; /* Remove underline */
+    padding: 5px 10px;
+    background-color: #5cb85c; /* Green background for logout */
+    border-radius: 5px; /* Rounded corners */
+    transition: background-color 0.3s ease;
+}
+
+.topbar .logout:hover {
+    background-color: #4cae4c; /* Darker green on hover */
+}
+.ok-but{
+            background-color:rgb(85, 221, 85);
+            padding-left: 7px;
+            padding-right: 7px;
+            padding-top:5px;
+            padding-bottom:5px;
+            color:white;
+            border:none;
+            border-radius: 4px;
+            margin-top:30px;
+        }
+        .cancel-but{
+            background-color:rgb(237, 52, 52);
+            padding-left: 7px;
+            padding-right: 7px;
+            padding-top:5px;
+            padding-bottom:5px;
+            color:white;
+            border:none;
+            border-radius: 4px;
+            margin-top:30px;
+        }
+        a {
+    text-decoration: none; /* Removes underline */
+}
+#logoutModal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0,0,0,0.5);
+    justify-content: center;
+    align-items: center;
+    z-index: 20; /* Ensure modal is on top */
+}
+
+        /* Main Content Styling */
+        .container {
+            padding: 30px;
+            margin-left: 270px;
+            margin-top: 60px;
+        }
+
+        label {
+            display: block;
+            margin-top: 15px;
+        }
+        input, select, button {
+            width: 100%;
+            padding: 8px;
+            margin-top: 5px;
+        }
+        .hidden {
+            display: none;
+        }
+        .fetch-button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        .fetch-button:hover {
+            background-color: #45a049;
+        }
+    </style>
+</head>
+<body>
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <a href="{{url_for('deptadmin_dashboard')}}">Dashboard</a>
+            <a href="{{ url_for('data_entry_dept') }}">Enter Data</a>
+            <a href="{{ url_for('update_data_dept') }}">Update Data</a>
+           
+        </div>
+    
+        <!-- Top Navigation Bar -->
+        <div class="topbar">
+            <div class="profile" onclick="toggleProfile()">
+                <a href="#"><span style="color:white;">Profile</span></a>
+                <div id="profile-info" class="profile-info">
+                  <p><strong>User ID:</strong> {{ user.id }}</p>
+                  <p><strong>Username:</strong> {{ user.username }}</p>
+                  <p><strong>Role:</strong> {{ user.role }}</p>
+                  <p><strong>Hospital ID:</strong> {{ user.hospital_id }}</p>
+                  <hr style="margin:8px 0; border:none; border-top:1px solid #eee;">
+                </div>
+              </div>
+            <a href="#" onclick="confirmLogout()" style="color:white;">Logout</a>
+            <div id="logoutModal" style="display:none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+        background-color: rgba(0,0,0,0.5); justify-content: center; align-items: center;">
+        <div style="background: white; padding: 30px; border-radius: 10px; width: 350px;  height: 250px; text-align: center;">
+            <p style="font-size: 18px;">Are you sure you want to exit?</p>
+            <form id="logoutForm" method="GET" action="{{ url_for('logout') }}">
+                <button type="submit" class="ok-but" style="margin-right: 10px; padding: 10px 20px;">Yes</button>
+                <button type="button" class="cancel-but" onclick="closeLogoutModal()" style="padding: 10px 20px;">Cancel</button>
+            </form>
+        </div>
+    </div>
+        </div>
+        
+
+        <div class="container">
+            <h1>Update Health Data</h1>
+            
+            <!-- Section to Enter Patient ID -->
+            <div id="search-section">
+                <label for="registration-id">Enter Registration ID:</label>
+                <input type="text" id="registration-id" placeholder="Enter patient registration ID">
+                <button class="fetch-button" onclick="fetchPatient()">Fetch Patient Details</button>
+            </div>
+        
+            <form id="update-form" class="hidden" method="POST" action="/update_patient">
+                <input type="hidden" name="source_page" value="update_data">
+                <input type="hidden" name="patient_id" id="patient_id">
+            
+                <label>Hospital ID:</label>
+                <input type="text" name="hospital_id" id="hospital_id" required>
+            
+                <label>Name:</label>
+                <input type="text" name="name" id="name" required>
+            
+                <label>Age:</label>
+                <input type="number" name="age" id="age" required>
+            
+                <label>Gender:</label>
+                <select name="gender" id="gender" required>
+                    <option value="">--Select Gender--</option>
+                    <option value="Male">Male</option>
+                    <option value="Female">Female</option>
+                    <option value="Other">Other</option>
+                </select>
+            
+                <label>Date of Birth:</label>
+                <input type="date" name="dob" id="dob">
+            
+                <label>Contact Info:</label>
+                <input type="text" name="contact_info" id="contact_info">
+            
+                <label>Weight (kg):</label>
+                <input type="number" name="weight" id="weight">
+            
+                <label>Height (cm):</label>
+                <input type="number" name="height" id="height">
+            
+                <label>Blood Pressure (mm Hg):</label>
+                <input type="text" name="blood_pressure" id="blood_pressure">
+            
+                <label>Temperature (°C):</label>
+                <input type="number" name="temperature" id="temperature" step="0.1">
+            
+                <label>Blood Sugar (mg/dL):</label>
+                <input type="number" name="blood_sugar" id="blood_sugar">
+            
+                <label>Department:</label>
+                <input type="text" name="department" id="department">
+            
+                <label>Doctor Consulted:</label>
+                <input type="text" name="doctor" id="doctor">
+            
+                <label>Disease/Diagnosis:</label>
+                <input type="text" name="disease" id="disease">
+            
+                <label>Lab Reports:</label>
+                <input type="text" name="lab_reports" id="lab_reports">
+            
+                <label>Policy Involvement:</label>
+                <input type="text" name="policy_involvement" id="policy_involvement">
+            
+                <label>Policy Schema:</label>
+                <input type="text" name="policy_schema" id="policy_schema">
+            
+                <label>Past Illnesses:</label>
+                <input type="text" name="past_illness" id="past_illness">
+            
+                <label>Allergies:</label>
+                <input type="text" name="allergies" id="allergies">
+            
+                <label>Previous Treatments:</label>
+                <input type="text" name="previous_treatments" id="previous_treatments">
+            
+                <label>Family History:</label>
+                <input type="text" name="family_history" id="family_history">
+            
+                <label>Admission Date:</label>
+                <input type="text" name="admission_date" id="admission_date">
+            
+                <label>Discharge Date:</label>
+                <input type="text" name="discharge_date" id="discharge_date">
+            
+                <button type="submit">Alter Data</button>
+            </form>            
+        
+            <p id="error-message" style="color:red;"></p>
+        </div>
+        
+        <script>
+            //profile displaying template comes here
+  function toggleProfile() {
+    const panel = document.getElementById('profile-info');
+    panel.style.display = panel.style.display === 'block' ? 'none' : 'block';
+  }
+  // close when clicking outside
+  document.addEventListener('click', e => {
+    const profile = document.querySelector('.topbar .profile');
+    const panel = document.getElementById('profile-info');
+    if (!profile.contains(e.target)) {
+      panel.style.display = 'none';
+    }
+  });
+//ends code for profile displaying
+    //For logout template
+    function confirmDelete(userId) {
+        const modal = document.getElementById('deleteModal');
+        const form = document.getElementById('deleteForm');
+        form.action = '/delete_user/' + userId;
+        modal.style.display = 'flex';
+    }
+
+    function closeModal() {
+        document.getElementById('deleteModal').style.display = 'none';
+    }
+
+    function confirmLogout() {
+        document.getElementById('logoutModal').style.display = 'flex';
+    }
+
+    function closeLogoutModal() {
+        document.getElementById('logoutModal').style.display = 'none';
+    }
+    //Template code ends
+            function fetchPatient() {
+                const regId = document.getElementById('registration-id').value;
+                if (!regId) {
+                    alert('Please enter Registration ID');
+                    return;
+                }
+        
+                fetch(`/fetch_patient/${regId}`)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Patient not found');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    console.log("Fetched Patient Data:", data);  // Debugging step
+        
+                    document.getElementById('update-form').classList.remove('hidden');
+                    document.getElementById('error-message').innerText = '';
+        
+                    document.getElementById('patient_id').value = data.patient_id;
+                    document.getElementById('hospital_id').value = data.hospital_id;
+                    document.getElementById('name').value = data.name || '';
+                    document.getElementById('age').value = data.age || '';
+                    document.getElementById('gender').value = data.gender || '';
+                    document.getElementById('dob').value = data.dob || '';
+                    document.getElementById('contact_info').value = data.contact_info || '';
+                    document.getElementById('weight').value = data.weight || '';
+                    document.getElementById('height').value = data.height || '';
+                    document.getElementById('blood_pressure').value = data.blood_pressure || '';
+                    document.getElementById('temperature').value = data.temperature || '';
+                    document.getElementById('blood_sugar').value = data.blood_sugar || '';
+                    document.getElementById('department').value = data.department || '';
+                    document.getElementById('doctor').value = data.doctor || '';
+                    document.getElementById('disease').value = data.disease || '';
+                    document.getElementById('lab_reports').value = data.lab_reports || '';
+                    document.getElementById('policy_involvement').value = data.policy_involvement || '';
+                    document.getElementById('policy_schema').value = data.policy_schema || '';
+                    document.getElementById('past_illness').value = data.past_illness || '';
+                    document.getElementById('allergies').value = data.allergies || '';
+                    document.getElementById('previous_treatments').value = data.previous_treatments || '';
+                    document.getElementById('family_history').value = data.family_history || '';
+        
+                    // Now admission_date and discharge_date set directly as plain text (NO formatting)
+                    document.getElementById('admission_date').value = data.admission_date || '';
+                    document.getElementById('discharge_date').value = data.discharge_date || '';
+                })
+                .catch(error => {
+                    document.getElementById('error-message').innerText = error.message;
+                    document.getElementById('update-form').classList.add('hidden');
+                });
+            }
+        </script>
+        </body>
+</html>

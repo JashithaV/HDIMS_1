@@ -1,0 +1,504 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Health Data Entry</title>
+    <style>
+                        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        /* Body Styling */
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f8ff; /* Light vibrant background */
+            display: flex;
+        }
+
+        .sidebar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 250px;
+            height: 100%;
+            background-color: #4086cd;
+            padding-top: 80px; /* Aligns with the header */
+            box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+            z-index: 10;
+        }
+        .sidebar a {
+            display: block;
+            color: white;
+            padding: 15px 20px;
+            text-decoration: none;
+            font-size: 18px;
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+        .sidebar a:hover {
+            background-color: #f1fffc;
+            color: rgba(0, 0, 0, 0.744);
+            font-weight: bold;
+        }
+        /* Top Navigation Bar Styling */
+        .topbar {
+            width: calc(100% - 250px); /* Full width minus sidebar */
+            background-color: #4086cd; /* Darker blue for top bar */
+            padding: 10px 20px;
+            position: fixed;
+            top: 0;
+            left: 250px; /* Align with sidebar */
+            display: flex;
+            justify-content: flex-start;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            z-index: 10;
+        }
+
+       /* make sure the profile container is the positioning context */
+.topbar .profile {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-left: auto;
+  margin-right: 30px;
+  font: 16px "Segoe UI", Tahoma, sans-serif;
+  color: #fff;
+  cursor: pointer;
+  z-index: 50;
+}
+
+/* the hidden dropdown panel */
+.topbar .profile-info {
+  display: none;
+  position: absolute;
+  top: calc(100% + 8px);   /* just below the profile link */
+  right: 0;                /* aligned to its right edge */
+  min-width: 220px;
+  padding: 16px;
+  background: #fff;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  font: 14px "Verdana", Geneva, sans-serif;
+  color: #333;
+  z-index: 100;
+}
+
+/* each line in the dropdown */
+.topbar .profile-info p {
+  margin: 6px 0;
+}
+
+/* emphasize the labels */
+.topbar .profile-info strong {
+  width: 80px;
+  display: inline-block;
+}
+
+/* add a little hover effect on the profile link */
+.topbar .profile:hover a span {
+  text-decoration: underline;
+}
+
+        .topbar .logout {
+    color: white;
+    font-size: 16px;
+    cursor: pointer;
+    text-decoration: none; /* Remove underline */
+    padding: 5px 10px;
+    background-color: #5cb85c; /* Green background for logout */
+    border-radius: 5px; /* Rounded corners */
+    transition: background-color 0.3s ease;
+}
+
+.topbar .logout:hover {
+    background-color: #4cae4c; /* Darker green on hover */
+}
+.ok-but{
+            background-color:rgb(85, 221, 85);
+            padding-left: 7px;
+            padding-right: 7px;
+            padding-top:5px;
+            padding-bottom:5px;
+            color:white;
+            border:none;
+            border-radius: 4px;
+            margin-top:30px;
+        }
+        .cancel-but{
+            background-color:rgb(237, 52, 52);
+            padding-left: 7px;
+            padding-right: 7px;
+            padding-top:5px;
+            padding-bottom:5px;
+            color:white;
+            border:none;
+            border-radius: 4px;
+            margin-top:30px;
+        }
+        a {
+    text-decoration: none; /* Removes underline */
+}
+#logoutModal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0,0,0,0.5);
+    justify-content: center;
+    align-items: center;
+    z-index: 20; /* Ensure modal is on top */
+    display: flex;
+}
+        /* Main Content Styling */
+        .container {
+            padding: 30px;
+            margin-left: 270px;
+            margin-top: 60px;
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 20px;
+        }
+
+        .form-section {
+            margin-bottom: 30px;
+            background-color: #e9f7fd; /* Background for each section */
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        .form-section h2 {
+            margin-bottom: 15px;
+            color: #4086cd;
+            border-bottom: 2px solid #4086cd; /* Divider line under each section heading */
+            padding-bottom: 5px;
+        }
+
+        label {
+            font-size: 16px;
+            color: #333;
+            margin-bottom: 5px;
+        }
+
+        input, select, textarea {
+            width: 48%;
+            padding: 10px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+            margin-bottom: 15px;
+            font-size: 14px;
+        }
+
+        textarea {
+            resize: vertical;
+            width: 100%;
+        }
+
+        .btn {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        .btn:hover {
+            background-color: #45a049;
+        }
+
+        .radio-buttons {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .radio-buttons label {
+            font-size: 14px;
+        }
+
+        .divider {
+            margin: 20px 0;
+            border-bottom: 1px solid #ccc;
+        }
+    </style>
+    <script>
+        function showSchemaInput(isVisible) {
+            const policySchemaInput = document.getElementById('policy-schema');
+            if (isVisible) {
+                policySchemaInput.style.display = 'block';
+            } else {
+                policySchemaInput.style.display = 'none';
+            }
+        }
+    </script>
+</head>
+<body>
+    <!-- Sidebar -->
+    <div class="sidebar">
+        <a href="{{url_for('hospitaladmin_dashboard')}}">Dashboard</a>
+        <a href="{{ url_for('data_entry') }}">Enter Data</a>
+        <a href="{{ url_for('update_data') }}">Update Data</a>
+        <a href="{{ url_for('program_entry') }}">Program Entry</a>
+        
+    </div>
+
+    <div class="topbar">
+        <div class="profile" onclick="toggleProfile()">
+            <a href="#"><span style="color:white;">Profile</span></a>
+            <div id="profile-info" class="profile-info">
+              <p><strong>User ID:</strong> {{ user.id }}</p>
+              <p><strong>Username:</strong> {{ user.username }}</p>
+              <p><strong>Role:</strong> {{ user.role }}</p>
+              <p><strong>Hospital ID:</strong> {{ user.hospital_id }}</p>
+              <hr style="margin:8px 0; border:none; border-top:1px solid #eee;">
+            </div>
+          </div>
+        <a href="#" onclick="confirmLogout()" style="color:white;">Logout</a>
+        <div id="logoutModal" style="display:none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+    background-color: rgba(0,0,0,0.5); justify-content: center; align-items: center;">
+    <div style="background: white; padding: 30px; border-radius: 10px; width: 350px;  height: 150px; text-align: center;">
+        <p style="font-size: 18px;">Are you sure you want to exit?</p>
+        <form id="logoutForm" method="GET" action="{{ url_for('logout') }}">
+            <button type="submit" class="ok-but" style="margin-right: 10px; padding: 10px 20px;">Yes</button>
+            <button type="button" class="cancel-but" onclick="closeLogoutModal()" style="padding: 10px 20px;">Cancel</button>
+        </form>
+    </div>
+</div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="container">
+        {% with messages = get_flashed_messages() %}
+            {% if messages %}
+              <div class="flash-message" style="color: green; font-weight: bold; margin-bottom: 10px;">
+                {% for message in messages %}
+                  <p>{{ message }}</p>
+                {% endfor %}
+              </div>
+            {% endif %}
+          {% endwith %}
+        <h1>Health Data Entry</h1>
+        <form action="/submit-data" method="POST">
+            
+            <div class="form-row" style="display: flex; justify-content: space-between; margin-bottom: 20px;">
+                <div style="flex: 1;">
+                    <label for="patient-id">Patient ID:</label>
+                    <input type="text" id="patient-id" name="patient_id" placeholder="Enter patient ID">
+                </div>
+                <div style="flex: 1; text-align: right;">
+                    <label for="hospital-id">Hospital ID:</label>
+                    <input type="text" id="hospital-id" name="hospital_id" placeholder="Enter hospital ID">
+                </div>
+            </div>
+            <div class="form-row" style="display: flex; justify-content: space-between; margin-bottom: 20px;">
+                <div style="flex: 1;">
+                    <label for="admission-date">Admission Date:</label>
+                    <input type="text" id="admission-date" name="admission_date" placeholder="Enter admission date (YYYY-MM-DD)">
+                </div>
+                <div style="flex: 1; text-align: right;">
+                    <label for="discharge-date">Discharge Date:</label>
+                    <input type="text" id="discharge-date" name="discharge_date" placeholder="Enter discharge date (YYYY-MM-DD)">
+                </div>
+            </div>
+            
+        <!-- Patient Info -->
+        <div class="form-section">
+            <h2>Patient Info</h2>
+            <div class="form-row">
+                <div>
+                    <label for="patient-name">Full Name:</label>
+                    <input type="text" id="patient-name" name="name" placeholder="Enter full name">
+                </div>
+                <div>
+                    <label for="age">Age:</label>
+                    <input type="number" id="age" name="age" placeholder="Enter age">
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div>
+                    <label for="gender">Gender:</label>
+                    <div class="radio-buttons">
+                        <label><input type="radio" name="gender" value="Male"> Male</label>
+                        <label><input type="radio" name="gender" value="Female"> Female</label>
+                        <label><input type="radio" name="gender" value="Other"> Other</label>
+                    </div>
+                </div>
+                <div>
+                    <label for="dob">Date of Birth:</label>
+                    <input type="date" id="dob" name="dob">
+                </div>
+            </div>
+
+            <label for="contact-info">Contact Info:</label>
+            <input type="text" id="contact-info" name="contact_info" placeholder="Enter contact information">
+        </div>
+
+        <div class="divider"></div>
+        <!-- General Check-Up Subdivision -->
+<div class="divider"></div>
+<div class="form-section">
+    <h2>General Check-Up Information</h2>
+
+    <div class="form-row">
+        <div>
+            <label for="weight">Weight (kg):</label>
+            <input type="number" id="weight" name="weight" placeholder="Enter weight in kilograms">
+        </div>
+        <div>
+            <label for="height">Height (cm):</label>
+            <input type="number" id="height" name="height" placeholder="Enter height in centimeters">
+        </div>
+    </div>
+
+    <div class="form-row">
+        <div>
+            <label for="bp">Blood Pressure (mmHg):</label>
+            <input type="text" id="bp" name="bp" placeholder="Enter BP (e.g., 120/80)">
+        </div>
+        <div>
+            <label for="temperature">Temperature (°C):</label>
+            <input type="number" id="temperature" name="temperature" step="0.1" placeholder="Enter body temperature in °C">
+        </div>
+    </div>
+
+    <div>
+        <label for="blood-sugar">Blood Sugar Level (mg/dL):</label>
+        <input type="number" id="blood-sugar" name="blood_sugar" placeholder="Enter blood sugar level (if relevant)">
+    </div>
+</div>
+
+
+        <!-- Current Condition -->
+        <div class="form-section">
+            <h2>Current Condition</h2>
+            <div class="form-row">
+                <div>
+                    <label for="department">Department:</label>
+                    <select id="department" name="department">
+                        <option value="Cardiology">Cardiology</option>
+                        <option value="Neurology">Neurology</option>
+                        <option value="Pediatrics">Pediatrics</option>
+                        <option value="Dermatology">Dermatology</option>
+                        <option value="Orthopedics">Orthopedics</option>
+                        <option value="Nephrology">Nephrology</option>
+                        <option value="Endocrinology">Endocrinology</option>
+                        <option value="Pulmonology">Pulmonology</option>
+                        <option value="Hematology">Hematology</option>
+                        <option value="General Medicine">General Medicine</option>
+                    </select>
+                </div>
+                <div>
+                    <label for="doctor">Consulted Doctor:</label>
+                    <input type="text" id="doctor" name="doctor" placeholder="Enter consulted doctor's name">
+                </div>
+            </div>
+
+            <label for="disease">Current Disease/Problem:</label>
+            <textarea id="disease" name="disease" rows="4" placeholder="Describe the current problem or disease"></textarea>
+
+            <label for="lab-reports">Lab Reports (if any):</label>
+            <textarea id="lab-reports" name="lab_reports" rows="4" placeholder="Mention any lab reports"></textarea>
+        </div>
+
+        <div class="divider"></div>
+
+
+        <div class="divider"></div>
+        <!-- Participant Subdivision -->
+
+        <div class="form-section">
+            <h2>Participant</h2>
+
+            <!-- Policy Involvement Question -->
+            <!-- Policy Involvement Question -->
+<label>Are you involved in any health policies?</label>
+<div class="radio-buttons">
+    <label><input type="radio" name="policy_involvement" value="Yes" onclick="showPolicyDropdown(true)"> Yes</label>
+    <label><input type="radio" name="policy_involvement" value="No" onclick="showPolicyDropdown(false)"> No</label>
+</div>
+
+<!-- Dropdown shown only if 'Yes' is selected -->
+<div id="policy-dropdown" style="display: none;">
+    <label for="selected-policy">Select the policy you are part of:</label>
+    <select id="selected-policy" name="selected_policy">
+        <option value="">-- Select Policy --</option>
+        {% for policy in policies %}
+            <option value="{{ policy[0] }}">{{ policy[1] }}</option>
+        {% endfor %}
+    </select>
+</div>
+        </div>
+
+        <!-- Medical History -->
+        <div class="form-section">
+            <h2>Medical History</h2>
+            <label for="past-illness">Past Illnesses and Surgeries:</label>
+            <textarea id="past-illness" name="past_illness" rows="4" placeholder="Mention any past illnesses or surgeries"></textarea>
+
+            <label for="allergies">Allergies:</label>
+            <textarea id="allergies" name="allergies" rows="4" placeholder="Enter any known allergies"></textarea>
+
+            <label for="previous-treatments">Previous Treatments:</label>
+            <textarea id="previous-treatments" name="previous_treatments" rows="4" placeholder="Enter any previous treatments"></textarea>
+
+            <label for="family-history">Family Medical History:</label>
+            <textarea id="family-history" rows="4" name="family_history" placeholder="Mention any family medical history"></textarea>
+        </div>
+
+        <button class="btn">Submit Health Data</button>
+        </form>
+    </div>
+    <script>
+        function showSchemaInput(show) {
+            const schemaDiv = document.getElementById("policy-schema");
+            schemaDiv.style.display = show ? "block" : "none";
+        }
+            //profile displaying template comes here
+  function toggleProfile() {
+    const panel = document.getElementById('profile-info');
+    panel.style.display = panel.style.display === 'block' ? 'none' : 'block';
+  }
+  // close when clicking outside
+  document.addEventListener('click', e => {
+    const profile = document.querySelector('.topbar .profile');
+    const panel = document.getElementById('profile-info');
+    if (!profile.contains(e.target)) {
+      panel.style.display = 'none';
+    }
+  });
+//ends code for profile displaying
+    //For logout template
+    function confirmDelete(userId) {
+        const modal = document.getElementById('deleteModal');
+        const form = document.getElementById('deleteForm');
+        form.action = '/delete_user/' + userId;
+        modal.style.display = 'flex';
+    }
+
+    function closeModal() {
+        document.getElementById('deleteModal').style.display = 'none';
+    }
+
+    function confirmLogout() {
+        document.getElementById('logoutModal').style.display = 'flex';
+    }
+
+    function closeLogoutModal() {
+        document.getElementById('logoutModal').style.display = 'none';
+    }
+    //Template code ends
+    </script>
+</body>
+</html>

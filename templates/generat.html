@@ -1,0 +1,957 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+     /* General Reset */
+     * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        /* Body Styling */
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f8ff; /* Light vibrant background */
+            display: flex;
+        }
+
+        .sidebar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 250px;
+            height: 100%;
+            background-color: #4086cd;
+            padding-top: 80px; /* Aligns with the header */
+            box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+            z-index: 1;
+        }
+        .sidebar a {
+            display: block;
+            color: white;
+            padding: 15px 20px;
+            text-decoration: none;
+            font-size: 18px;
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+        .sidebar a:hover {
+            background-color: #f1fffc;
+            color: rgba(0, 0, 0, 0.744);
+            font-weight: bold;
+        }
+        /* Top Navigation Bar Styling */
+        .topbar {
+            width: calc(100% - 250px); /* Full width minus sidebar */
+            background-color: #4086cd; /* Darker blue for top bar */
+            padding: 10px 20px;
+            position: fixed;
+            top: 0;
+            left: 250px; /* Align with sidebar */
+            display: flex;
+            justify-content: flex-start;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            z-index: 10;
+        }
+
+       /* make sure the profile container is the positioning context */
+.topbar .profile {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-left: auto;
+  margin-right: 30px;
+  font: 16px "Segoe UI", Tahoma, sans-serif;
+  color: #fff;
+  cursor: pointer;
+  z-index: 50;
+}
+
+/* the hidden dropdown panel */
+.topbar .profile-info {
+  display: none;
+  position: absolute;
+  top: calc(100% + 8px);   /* just below the profile link */
+  right: 0;                /* aligned to its right edge */
+  min-width: 220px;
+  padding: 16px;
+  background: #fff;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  font: 14px "Verdana", Geneva, sans-serif;
+  color: #333;
+  z-index: 100;
+}
+
+/* each line in the dropdown */
+.topbar .profile-info p {
+  margin: 6px 0;
+}
+
+/* emphasize the labels */
+.topbar .profile-info strong {
+  width: 80px;
+  display: inline-block;
+}
+
+/* add a little hover effect on the profile link */
+.topbar .profile:hover a span {
+  text-decoration: underline;
+}
+
+        .topbar .logout {
+    color: white;
+    font-size: 16px;
+    cursor: pointer;
+    text-decoration: none; /* Remove underline */
+    padding: 5px 10px;
+    background-color: #5cb85c; /* Green background for logout */
+    border-radius: 5px; /* Rounded corners */
+    transition: background-color 0.3s ease;
+}
+
+.topbar .logout:hover {
+    background-color: #4cae4c; /* Darker green on hover */
+}
+.ok-but{
+            background-color:rgb(85, 221, 85);
+            padding-left: 7px;
+            padding-right: 7px;
+            padding-top:5px;
+            padding-bottom:5px;
+            color:white;
+            border:none;
+            border-radius: 4px;
+            margin-top:30px;
+        }
+        .cancel-but{
+            background-color:rgb(237, 52, 52);
+            padding-left: 7px;
+            padding-right: 7px;
+            padding-top:5px;
+            padding-bottom:5px;
+            color:white;
+            border:none;
+            border-radius: 4px;
+            margin-top:30px;
+        }
+        a {
+    text-decoration: none; /* Removes underline */
+}   #logoutModal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0,0,0,0.5);
+    justify-content: center;
+    align-items: center;
+    z-index: 20; /* Ensure modal is on top */
+    display: flex;
+}
+
+/* 1. Ensure the container spans the remaining width beside the sidebar */
+.generate-container {
+    margin-top:30px;
+    margin-left: 250px;  /* Sidebar width */
+    padding: 30px;
+    width: calc(100% - 250px); /* Adjust container width based on sidebar */
+}
+.top-half {
+    flex: 1;
+    display: flex;
+    padding: 10px;
+    gap: 20px;
+}
+
+.xy-form {
+    flex: 1;
+}
+
+.filters-panel {
+    flex: 1;
+    background-color: #f9f9f9;
+    padding: 20px;
+    border-radius: 10px;
+    overflow-y: auto;
+}
+
+.bottom-half {
+    flex: 1;
+    padding: 10px;
+    background-color: #fff;
+    border-top: 1px solid #ccc;
+}
+
+.chart {
+    width: 100%;
+    height: 100%;
+    background-color: #eef;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 1.2rem;
+}
+.filter-section, .axis-section {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        .filter-section label, .axis-section label {
+            display: block;
+            margin-top: 10px;
+            font-weight: bold;
+        }
+        .filter-section input, .axis-section input, .axis-section select {
+            width: 100%;
+            padding: 8px;
+            margin-top: 5px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+.form-section {
+            display: flex;
+            gap: 30px;
+            flex-wrap: wrap;
+            margin-bottom: 30px;
+        }
+
+        .form-box {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            flex: 1 1 45%;
+            min-width: 300px;
+        }
+
+        .form-box label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+
+        .form-box input, .form-box select {
+            width: 100%;
+            padding: 8px;
+            margin-bottom: 15px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+        }
+        label {
+            display: block;
+            margin-top: 10px;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        #x-input, #y-input {
+    margin-top: 15px;
+    padding-left: 15px;
+    border-left: 3px solid #ccc;
+    padding-bottom: 10px;
+    margin-bottom: 15px;
+}
+
+#x-input label,
+#y-input label {
+    display: block;
+    margin-top: 10px;
+    font-weight: 500;
+    color: #333;
+}
+
+#x-input input,
+#x-input select,
+#y-input input,
+#y-input select {
+    margin-top: 5px;
+    padding: 6px 10px;
+    width: 90%;
+    max-width: 300px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    display: block;
+}
+
+
+        input, select {
+            padding: 6px;
+            width: 100%;
+            max-width: 300px;
+            margin-bottom: 10px;
+        }
+
+        .generate-btn {
+    background-color: #2980b9;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 16px;
+    margin-top: 15px;
+    display: inline-block; 
+    /* Ensures it stays inline-sized */
+}
+
+.generate-btn:hover {
+    background-color: #1f618d;
+        }
+
+        .results-section {
+    margin-top: 30px;
+    background: white;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.chart {
+    height: 400px;
+    background: #ecf0f1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-weight: bold;
+    color: #7f8c8d;
+    border-radius: 8px;
+}
+
+        .card-container {
+    display: flex;
+    gap: 20px; /* space between cards */
+    flex-wrap: wrap; /* allows responsiveness on smaller screens */
+    margin-top: 20px;
+}
+
+
+.card {
+    background-color: #f9f9f9;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+    flex: 1 1 45%; /* allow to shrink and grow, but prefer 45% width */
+}
+
+@media screen and (max-width: 768px) {
+    .card {
+        flex: 1 1 100%; /* stack on small screens */
+    }
+}
+.filters-section select {
+    margin-top: 5px;
+    padding: 6px 10px;
+    width: 90%;
+    max-width: 300px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    display: block;
+}
+    </style>
+</head>
+<body>
+    <div class="topbar">
+        <div class="profile" onclick="toggleProfile()">
+            <a href="#"><span style="color:white;">Profile</span></a>
+            <div id="profile-info" class="profile-info">
+              <p><strong>User ID:</strong> {{ user.id }}</p>
+              <p><strong>Username:</strong> {{ user.username }}</p>
+              <p><strong>Role:</strong> {{ user.role }}</p>
+              <p><strong>Hospital ID:</strong> {{ user.hospital_id }}</p>
+              <hr style="margin:8px 0; border:none; border-top:1px solid #eee;">
+            </div>
+          </div>
+        <a href="#" onclick="confirmLogout()" style="color:white;">Logout</a>
+        <div id="logoutModal" style="display:none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+    background-color: rgba(0,0,0,0.5); justify-content: center; align-items: center;">
+    <div style="background: white; padding: 30px; border-radius: 10px; width: 350px;  height: 150px; text-align: center;">
+        <p style="font-size: 18px;">Are you sure you want to exit?</p>
+        <form id="logoutForm" method="GET" action="{{ url_for('logout') }}">
+            <button type="submit" class="ok-but" style="margin-right: 10px; padding: 10px 20px;">Yes</button>
+            <button type="button" class="cancel-but" onclick="closeLogoutModal()" style="padding: 10px 20px;">Cancel</button>
+        </form>
+    </div>
+</div>
+    </div>
+
+<!-- Sidebar Menu -->
+<div class="sidebar">
+    <a href="{{ url_for('superadmin_dashboard') }}">Dashboard</a>
+    <a href="{{ url_for('view') }}">Performance Reports</a>
+    <a href="{{ url_for('generat') }}">Generate Analytics</a>
+    <a href="{{ url_for('monitor') }}">Monitor Implementation</a>
+    <a href="{{ url_for('policy_data') }}">Policy Input Generation</a>
+    <a href="{{ url_for('manage_user') }}">Manage Users</a>
+</div>
+
+    <div class="generate-container">
+        <h2>Generate Analytics</h2>
+        <!-- BEGIN: Analytics Description -->
+        <div style="background: #eaf6ff; border-left: 5px solid #4086cd; padding: 18px 22px; border-radius: 8px; margin-bottom: 22px; font-size: 1.08em; color: #234;"><strong>How does this work?</strong><br>
+            <ul style="margin-top: 8px; margin-bottom: 0; padding-left: 22px;">
+                <li><b>X-axis</b>: The field you want to <b>group by</b> (e.g., Age, Gender, Department, Disease, etc.).</li>
+                <li><b>Y-axis</b>: The value you want to <b>aggregate</b> (e.g., count, average, sum).<br>
+                    <span style="color:#555;">For categorical Y, the system will count the number of records for each X value.</span></li>
+                <li><b>Tip:</b> For distributions (e.g., gender distribution), set X-axis to the category (Gender), and Y-axis to any field (the system will count records).<br>
+                For trends (e.g., average blood sugar by age), set X-axis to Age, Y-axis to Blood Sugar.</li>
+            </ul>
+        </div>
+        <!-- END: Analytics Description -->
+        <div class="top-half">
+        <form method="POST" action="/generat" class="xy-form">
+        <div class="card-container">
+            <div class="card axis-card ">
+                <label for="x-axis">Select X-axis Parameter:
+                  <span title="The field to group by. For example, to see gender distribution, select Gender here." style="cursor: help; color: #2980b9;">&#9432;</span>
+                </label>
+                <select id="x-axis" name="x_axis" onchange="showDynamicInput('x')">
+                    <option value="">--Select--</option>
+                    <option value="admission_date">Admission Date</option>
+                    <option value="disease">Disease</option>
+                    <option value="age">Age</option>
+                    <option value="gender">Gender</option>
+                    <option value="department">Department</option>
+                   <!-- <option value="hospitals">Hospitals</option>-->
+                    <option value="allergies">Allergies</option>
+                    <!--<option value="delay_reason">Reason for Delay</option>-->
+                </select>
+                <div id="x-input"></div>
+                
+                <!-- Y-axis Selector -->
+                <label for="y-axis">Select Y-axis Parameter:
+                  <span title="The value to aggregate. For categorical Y, the system will count records for each X value. For numeric Y, it will show the average or sum." style="cursor: help; color: #2980b9;">&#9432;</span>
+                </label>
+                <select id="y-axis" name="y_axis" onchange="showDynamicInput('y')">
+                    <option value="">--Select--</option>
+                    <option value="blood_sugar">Blood Sugar Levels</option>
+                    <option value="blood_pressure">Blood Pressure</option>
+                    <!--<option value="recovery_time">Recovery Time</option>-->
+                    <!-- <option value="repeat_admissions">Repeat Admissions</option>-->
+                    <option value="age">Age</option>
+                </select>
+                <div id="y-input"></div>
+                <div class="button-wrapper"><button class="generate-btn">Generate Chart</button></div>
+        </div></div>
+    </form>
+       <!-- <div class="card-container">
+            <div class="card axis-card" id="filters-card">
+                <label style="font-weight:bold;">Filter Parameters:</label>
+        <div id="filter-container">
+            <div class="filter-block">
+                <label>Select Filter Parameter:</label>
+                <select name="filters[]" onchange="showFilterInput(this)">
+                    <option value="">--Select--</option>
+                    <option value="admission_date">Admission Date</option>
+                    <option value="disease">Disease</option>
+                    <option value="blood_sugar">Blood Sugar Levels</option>
+                    <option value="recovery_time">Recovery Time</option>
+                    <option value="age">Age</option>
+                    <option value="gender">Gender</option>
+                    <option value="repeat_admissions">Repeat Admissions</option>
+                    <option value="department">Department</option>
+                    <option value="hospitals">Hospitals</option>
+                    <option value="allergies">Allergies</option>
+                    <option value="delay_reason">Reason for Delay</option>
+                </select>
+                <div class="filter-input"></div>
+            </div>
+        </div>
+        <div style="margin-top: 10px;">
+            <button type="button" onclick="addFilter()">+ Add Another Filter</button>
+        </div>-->
+        </div>
+        </div></div>
+        <div class="results-section">
+            <div class="chart">Chart: Data Representation Here</div>
+            <canvas id="analyticsChart" width="400" height="200"></canvas>
+        </div>
+    </div>
+    <script id="departments-data" type="application/json">
+        {{ departments|tojson }}
+    </script>
+    <script id="delay-reasons-data" type="application/json">
+        {{ delay_reasons|tojson }}
+    </script>
+    <script id="hospitals-data" type="application/json">
+        {{ hospitals|tojson }}
+    </script>
+    <script id="diseases-data" type="application/json">
+        {{ diseases|tojson }}
+    </script>
+    <script>
+        const departments = JSON.parse(document.getElementById('departments-data').textContent);
+        const delayReasons = JSON.parse(document.getElementById('delay-reasons-data').textContent);
+        const hospitals = JSON.parse(document.getElementById('hospitals-data').textContent);
+        const diseases = JSON.parse(document.getElementById('diseases-data').textContent);
+        
+        console.log('Initial diseases:', diseases); // Debug log
+    </script>
+    
+    <!-- Then include or define your JavaScript logic -->
+    
+    <script>
+            function getInputHTML(field, namePrefix) {
+        if (field === 'department') {
+            return `
+                <label>Department</label>
+                <select name="${namePrefix}_department">
+                    ${departments.map(dep => `<option value="${dep}">${dep}</option>`).join('')}
+                </select>
+            `;
+        }
+        if (field === 'hospitals') {
+            return `
+                <label>Hospitals</label>
+                <select name="${namePrefix}_hospitals">
+                    ${hospitals.map(hosp => `<option value="${hosp}">${hosp}</option>`).join('')}
+                </select>
+            `;
+        }
+        if (field === 'delay_reason') {
+            return `
+                <label>Delay Reason</label>
+                <select name="${namePrefix}_delay_reason">
+                    ${delayReasons.map(reason => `<option value="${reason}">${reason}</option>`).join('')}
+                </select>
+            `;
+        }
+        if (field === 'disease') {
+            console.log('Diseases available:', diseases); // Debug log
+            return `
+                <label>Disease</label>
+                <select name="${namePrefix}_disease">
+                    <option value="">--Select Disease--</option>
+                    ${diseases.map(disease => `<option value="${disease}">${disease}</option>`).join('')}
+                </select>
+            `;
+        }
+        //... rest of your cases
+    }
+
+         //profile displaying template comes here
+  function toggleProfile() {
+    const panel = document.getElementById('profile-info');
+    panel.style.display = panel.style.display === 'block' ? 'none' : 'block';
+  }
+  // close when clicking outside
+  document.addEventListener('click', e => {
+    const profile = document.querySelector('.topbar .profile');
+    const panel = document.getElementById('profile-info');
+    if (!profile.contains(e.target)) {
+      panel.style.display = 'none';
+    }
+  });
+//ends code for profile displaying
+    //For logout template
+    function confirmDelete(userId) {
+        const modal = document.getElementById('deleteModal');
+        const form = document.getElementById('deleteForm');
+        form.action = '/delete_user/' + userId;
+        modal.style.display = 'flex';
+    }
+
+    function closeModal() {
+        document.getElementById('deleteModal').style.display = 'none';
+    }
+
+    function confirmLogout() {
+        document.getElementById('logoutModal').style.display = 'flex';
+    }
+
+    function closeLogoutModal() {
+        document.getElementById('logoutModal').style.display = 'none';
+    }
+    //Template code ends
+function getInputHTML(field, namePrefix) {
+    switch(field) {
+        case 'age':
+            return `
+                <label>Min Age</label><input type="number" name="${namePrefix}_min_age">
+                <label>Max Age</label><input type="number" name="${namePrefix}_max_age">
+            `;
+        case 'gender':
+            return `
+                <label>Select Gender</label>
+                <select name="${namePrefix}_gender">
+                    <option value="Male">Male</option>
+                    <option value="Female">Female</option>
+                    <option value="Other">Other</option>
+                </select>
+            `;
+        case 'admission_date':
+        case 'start_date':
+        case 'actual_end_date':
+            return `
+                <label>Start Date</label><input type="date" name="${namePrefix}_start_date">
+                <label>End Date</label><input type="date" name="${namePrefix}_end_date">
+            `;
+        case 'blood_sugar':
+            return `
+                <label>Min Blood Sugar</label><input type="number" step="0.1" name="${namePrefix}_min_sugar">
+                <label>Max Blood Sugar</label><input type="number" step="0.1" name="${namePrefix}_max_sugar">
+            `;
+        case 'blood_pressure':
+            return `
+                <label>Min Systolic</label><input type="number" name="${namePrefix}_min_systolic">
+                <label>Max Systolic</label><input type="number" name="${namePrefix}_max_systolic">
+                <label>Min Diastolic</label><input type="number" name="${namePrefix}_min_diastolic">
+                <label>Max Diastolic</label><input type="number" name="${namePrefix}_max_diastolic">
+            `;
+        case 'recovery_time':
+            return `
+                <label>Min Days</label><input type="number" name="${namePrefix}_min_recovery">
+                <label>Max Days</label><input type="number" name="${namePrefix}_max_recovery">
+            `;
+        case 'disease':
+            console.log('Diseases available:', diseases); // Debug log
+            return `
+                <label>Disease</label>
+                <select name="${namePrefix}_disease">
+                    <option value="">--Select Disease--</option>
+                    ${diseases.map(disease => `<option value="${disease}">${disease}</option>`).join('')}
+                </select>
+            `;
+        case 'allergies':
+            return `<label>${field.charAt(0).toUpperCase() + field.slice(1)}</label><input type="text" name="${namePrefix}_${field}">`;
+        case 'repeat_admissions':
+            return `<label>Repeat Admissions</label><input type="checkbox" name="${namePrefix}_repeat" value="1"> Yes`;
+        case 'department':
+            return `
+                <label>Department</label>
+                <select name="${namePrefix}_department">
+                    ${departments.map(dep => `<option value="${dep}">${dep}</option>`).join('')}
+                </select>
+            `;
+        case 'hospitals':
+            return `
+                <label>Hospitals</label>
+                <select name="${namePrefix}_hospitals">
+                    ${hospitals.map(hosp => `<option value="${hosp}">${hosp}</option>`).join('')}
+                </select>
+            `;
+        case 'delay_reason':
+            return `
+                <label>Delay Reason</label>
+                <select name="${namePrefix}_delay_reason">
+                    ${delayReasons.map(reason => `<option value="${reason}">${reason}</option>`).join('')}
+                </select>
+            `;
+        default:
+            return '';
+    }
+}
+
+function showDynamicInput(axis) {
+    const field = document.getElementById(`${axis}-axis`).value;
+    const container = document.getElementById(`${axis}-input`);
+    container.innerHTML = ""; // Clear previous input
+
+    // Skip creating input for these fields when they're selected as x-axis
+    if (axis === 'x' && ['disease', 'gender', 'allergies', 'department'].includes(field)) {
+        return; // Don't create any input for these fields when they're x-axis
+    }
+
+    if (field === "allergies") {
+        // Handle dynamic dropdown for allergies
+        fetch('/get_allergies')
+            .then(response => response.json())
+            .then(data => {
+                if (data.length > 0) {
+                    const dropdown = document.createElement('select');
+                    dropdown.name = `${axis}_allergy_value`;
+                    dropdown.id = `${axis}-allergy-dropdown`;
+
+                    const defaultOption = document.createElement('option');
+                    defaultOption.value = "";
+                    defaultOption.textContent = "--Select Allergy--";
+                    dropdown.appendChild(defaultOption);
+
+                    data.forEach(item => {
+                        const option = document.createElement('option');
+                        option.value = item;
+                        option.textContent = item;
+                        dropdown.appendChild(option);
+                    });
+
+                    container.appendChild(dropdown);
+                } else {
+                    container.textContent = "No allergy data found.";
+                }
+            })
+            .catch(error => {
+                console.error('Error fetching allergies:', error);
+                container.textContent = "Error loading allergies.";
+            });
+    } else {
+        // Fallback to original logic
+        container.innerHTML = getInputHTML(field, axis);
+    }
+}
+
+
+function addFilter() {
+    const container = document.getElementById('filter-container');
+    const filterBlock = document.createElement('div');
+    filterBlock.classList.add('filter-block');
+    filterBlock.innerHTML = `
+        <label>Select Filter Parameter:</label>
+        <select name="filters[]" onchange="showFilterInput(this)">
+            <option value="">--Select--</option>
+            <option value="admission_date">Admission Date</option>
+            <option value="start_date">Start Date</option>
+            <option value="actual_end_date">Actual End Date</option>
+            <option value="disease">Disease</option>
+            <option value="blood_sugar">Blood Sugar Levels</option>
+            <option value="recovery_time">Recovery Time</option>
+            <option value="age">Age</option>
+            <option value="gender">Gender</option>
+            <option value="repeat_admissions">Repeat Admissions</option>
+            <option value="department">Department</option>
+            <option value="allergies">Allergies</option>
+            <option value="delay_reason">Reason for Delay</option>
+        </select>
+        <div class="filter-input"></div>
+    `;
+    container.appendChild(filterBlock);
+}
+
+function showFilterInput(selectElement) {
+    const field = selectElement.value;
+    const inputDiv = selectElement.nextElementSibling;
+    const filterIndex = Array.from(document.querySelectorAll('select[name="filters[]"]')).indexOf(selectElement);
+    inputDiv.innerHTML = getInputHTML(field, `filter_${filterIndex}`);
+}
+//for chart
+    </script>
+    <script>
+document.querySelector('.generate-btn').addEventListener('click', async function(e) {
+    e.preventDefault();
+
+    // Show loading state
+    const generateBtn = this;
+    const originalText = generateBtn.textContent;
+    generateBtn.textContent = 'Generating...';
+    generateBtn.disabled = true;
+
+    const x_axis = document.getElementById('x-axis').value;
+    const y_axis = document.getElementById('y-axis').value;
+
+    if (!x_axis || !y_axis) {
+        alert('Please select both X and Y axis parameters');
+        generateBtn.textContent = originalText;
+        generateBtn.disabled = false;
+        return;
+    }
+
+    // Collect all filter values
+    const filters = {};
+    document.querySelectorAll('.filter-block').forEach((block, i) => {
+        const select = block.querySelector('select[name="filters[]"]');
+        const field = select.value;
+        const prefix = `filter_${i}_`;
+
+        if (!field) return;
+
+        if (['age', 'blood_sugar', 'recovery_time'].includes(field)) {
+            filters[field] = {
+                min: block.querySelector(`[name^="${prefix}min"]`)?.value || '',
+                max: block.querySelector(`[name^="${prefix}max"]`)?.value || ''
+            };
+        } else if (['admission_date', 'start_date', 'actual_end_date'].includes(field)) {
+            filters[field] = {
+                min: block.querySelector(`[name^="${prefix}start_date"]`)?.value || '',
+                max: block.querySelector(`[name^="${prefix}end_date"]`)?.value || ''
+            };
+        } else {
+            filters[field] = block.querySelector(`[name^="${prefix}${field}"]`)?.value || '';
+        }
+    });
+
+    try {
+        const response = await fetch('/generat_data', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({x_axis, y_axis, filters})
+        });
+
+        const result = await response.json();
+
+        if (!response.ok) {
+            throw new Error(result.error || 'Failed to generate chart');
+        }
+
+        if (result.error) {
+            throw new Error(result.error);
+        }
+
+        renderChart(result);
+    } catch (error) {
+        console.error('Error:', error);
+        // Show error in a more user-friendly way
+        const chartContainer = document.querySelector('.chart');
+        chartContainer.innerHTML = `
+            <div style="color: #721c24; background-color: #f8d7da; border: 1px solid #f5c6cb; padding: 15px; border-radius: 5px; text-align: center;">
+                <h4 style="margin: 0 0 10px 0;">Error Generating Chart</h4>
+                <p style="margin: 0;">${error.message}</p>
+            </div>
+        `;
+    } finally {
+        // Reset button state
+        generateBtn.textContent = originalText;
+        generateBtn.disabled = false;
+    }
+});
+
+let chartInstance;
+
+function renderChart(data) {
+    const ctx = document.getElementById('analyticsChart').getContext('2d');
+
+    if (chartInstance) {
+        chartInstance.destroy();
+    }
+
+    // Grouped bar chart support: if data.data.datasets exists, use it
+    let chartData;
+    if (data.data.datasets) {
+        chartData = {
+            labels: data.data.labels,
+            datasets: data.data.datasets.map((ds, i) => ({
+                ...ds,
+                backgroundColor: getChartColors('bar', data.data.datasets.length, i),
+                borderWidth: 1
+            }))
+        };
+    } else {
+        chartData = {
+            labels: data.data.labels || data.data.map(d => d.label),
+            datasets: [{
+                label: data.y_label,
+                data: data.data.values || data.data.map(d => d.value),
+                backgroundColor: getChartColors(data.chart_type, data.data.labels?.length || data.data.length),
+                borderColor: data.chart_type === 'line' ? 'rgb(75, 192, 192)' : undefined,
+                borderWidth: 1
+            }]
+        };
+    }
+
+    const chartConfig = {
+        type: data.chart_type,
+        data: chartData,
+        options: {
+            responsive: true,
+            plugins: {
+                title: {
+                    display: true,
+                    text: `${data.y_label} vs ${data.x_label}`
+                },
+                legend: {
+                    display: chartData.datasets.length > 1
+                },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            if (context.dataset.data && typeof context.parsed.y !== 'undefined') {
+                                return `${context.dataset.label}: ${context.parsed.y}`;
+                            }
+                            return context.dataset.label + ': ' + context.raw;
+                        }
+                    }
+                }
+            },
+            scales: data.chart_type !== 'pie' ? {
+                x: {
+                    title: {
+                        display: true,
+                        text: data.x_label
+                    },
+                    stacked: false
+                },
+                y: {
+                    title: {
+                        display: true,
+                        text: data.y_label
+                    },
+                    beginAtZero: true,
+                    stacked: false,
+                    ticks: {
+                        stepSize: 1  // Ensure whole numbers for counts
+                    }
+                }
+            } : undefined
+        }
+    };
+
+    try {
+        chartInstance = new Chart(ctx, chartConfig);
+    } catch (error) {
+        console.error('Error rendering chart:', error);
+        const chartContainer = document.querySelector('.chart');
+        chartContainer.innerHTML = `
+            <div style="color: #721c24; background-color: #f8d7da; border: 1px solid #f5c6cb; padding: 15px; border-radius: 5px; text-align: center;">
+                <h4 style="margin: 0 0 10px 0;">Error Rendering Chart</h4>
+                <p style="margin: 0;">${error.message}</p>
+            </div>
+        `;
+    }
+}
+
+
+document.querySelector('.generate-btn').addEventListener('click', async function(e) {
+    e.preventDefault();
+    // … collect x_axis, y_axis, filters …
+    const res = await fetch('/generat_data', {/* … */});
+    const result = await res.json();
+
+    // grab your canvas
+    const ctx = document.getElementById('analyticsChart').getContext('2d');
+    if (window.chartInstance) window.chartInstance.destroy();
+
+    // use the **actual** arrays from your response here:
+    window.chartInstance = new Chart(ctx, {
+      type: result.chart_type,          // e.g. 'line'
+      data: {
+        labels: result.data.labels,     // <-- dynamic labels from DB
+        datasets: [{
+          label: result.y_label,
+          data: result.data.values,     // <-- dynamic Y values
+          borderColor: 'rgb(75,192,192)',
+          fill: false
+        }]
+      },
+      options: {
+        scales: {
+          x: { title: { display: true, text: result.x_label } },
+          y: { title: { display: true, text: result.y_label }, beginAtZero: true }
+        }
+      }
+    });
+  });
+
+function getChartColors(chartType, count, idx) {
+    // For grouped bars, use different color for each dataset
+    const palette = [
+        '#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF',
+        '#FF9F40', '#8BC34A', '#E91E63', '#00BCD4', '#FFC107',
+        '#9C27B0', '#03A9F4', '#CDDC39', '#FF5722', '#607D8B'
+    ];
+    if (chartType === 'pie') {
+        return palette.slice(0, count);
+    }
+    if (chartType === 'bar' && typeof idx !== 'undefined') {
+        return palette[idx % palette.length];
+    }
+    if (chartType === 'line') {
+        return 'rgb(75, 192, 192)';
+    }
+    return 'rgba(75, 192, 192, 0.6)';
+}
+</script>
+</body>
+</html>

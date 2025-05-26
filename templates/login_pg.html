@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HDIMS Login</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: Arial, sans-serif;
+        }
+
+        body {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            background: linear-gradient(135deg, #0052D4, #4364F7, #6FB1FC);
+            overflow: hidden;
+        }
+
+        .glass-container {
+            width: 350px;
+            padding: 30px;
+            background: rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+            text-align: center;
+        }
+
+        .logo {
+            width: 120px;
+            height: auto;
+            margin-bottom: 15px;
+        }
+
+        h1 {
+            color: #fff;
+            font-size: 24px;
+            font-weight: bold;
+        }
+
+        h3 {
+            color: #ddd;
+            font-size: 14px;
+            margin-bottom: 20px;
+        }
+        .error-message {
+            color: red;
+            font-size: 12px;
+            margin-top: 5px;
+            display: none;
+        }
+        .input-group {
+            text-align: left;
+            margin-bottom: 15px;
+        }
+
+        .input-group label {
+            display: block;
+            font-weight: bold;
+            font-size: 14px;
+            color: white;
+        }
+
+        .input-group select, .input-group input {
+            width: 100%;
+            padding: 12px;
+            border: none;
+            border-radius: 6px;
+            font-size: 14px;
+            background: rgba(255, 255, 255, 0.3);
+            color: black;
+            outline: none;
+        }
+
+        .forgot-password {
+            text-align: right;
+            font-size: 12px;
+            margin-bottom: 15px;
+        }
+
+        .forgot-password a {
+            color: #fff;
+            text-decoration: none;
+        }
+
+        .btn {
+            width: 100%;
+            background-color: #002D62;
+            color: white;
+            padding: 12px;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        .btn:hover {
+            background-color: #001F48;
+        }
+
+        .signup-btn {
+    display: block; /* Makes it behave like a button */
+    text-align: center; /* Centers the text */
+    text-decoration: none; /* Removes default underline */
+    margin-top: 10px; /* Adjust spacing */
+    padding: 12px;
+    background-color: transparent;
+    color: white;
+    border: 2px solid white;
+    border-radius: 6px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.signup-btn:hover {
+    background-color: white;
+    color: #002D62;
+}
+
+    </style>
+</head>
+<body>
+    <div class="glass-container">
+        <h1>HDIMS</h1>
+        <h3>Secure Health Data Management System</h3>
+
+        <form id="loginForm" action="{{ url_for('login') }}" method="POST">
+            <div class="input-group">
+                <label for="role">Select Role</label>
+                <select id="role" name="role" onchange="handleRoleSelection()" required>
+                    <option value="" selected disabled>Select Your Role</option>
+                    <option value="hospitaladmin">Hospital Admin</option>
+                    <option value="departmentstaff">Department Staff</option>
+                    <option value="superadmin">Super Admin</option>
+                </select>
+                <p id="role-error" class="error-message">{{ errors.get('role', '') }}</p> 
+            </div>
+        
+            <div class="input-group">
+                <label for="username">Email</label>
+                <input type="email" id="email" name="email" placeholder="Enter your email" required>
+                <p id="email-error" class="error-message">{{ errors.get('email', '') }}</p>
+            </div>
+        
+            <div class="input-group">
+                <label for="password">Password</label>
+                <input type="password" id="password" name="password" placeholder="Enter your password" required>
+                <p id="password-error" class="error-message">{{ errors.get('password', '') }}</p>
+            </div>
+        
+            <div class="forgot-password">
+                <a href="#">Forgot Password?</a>
+            </div>
+        
+            <button type="submit" class="btn">Sign in</button>
+            
+            <div style="margin-top: 10px;">
+                <a href="{{ url_for('signup') }}" class="signup-btn">Don't have an account? Sign up</a>
+            </div>
+        </form>       
+    </div>
+    <script>
+        function handleRoleSelection() {
+    var role = document.getElementById("role").value;
+    if (role === "superadmin") {
+        window.location.href = "{{ url_for('superadmin_login') }}";
+    }
+}
+document.addEventListener("DOMContentLoaded", function () {
+    // Clear all error messages initially
+    document.getElementById('email-error').style.display = "none";
+    document.getElementById('password-error').style.display = "none";
+    document.getElementById('role-error').style.display = "none";
+
+    // Only show errors if they exist and the page wasn't refreshed
+    if (performance.navigation.type !== performance.navigation.TYPE_RELOAD) {
+        var emailError = document.getElementById("email-error");
+        var passwordError = document.getElementById("password-error");
+        var roleError = document.getElementById("role-error");
+
+        if (emailError.textContent.trim() !== "") {
+            emailError.style.display = "block";
+        }
+        if (passwordError.textContent.trim() !== "") {
+            passwordError.style.display = "block";
+        }
+        if (roleError.textContent.trim() !== "") {
+            roleError.style.display = "block";
+        }
+    }
+});
+    </script>
+</body>
+</html>

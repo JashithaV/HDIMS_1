@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Super Admin Login - HDIMS</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: Arial, sans-serif;
+        }
+
+        body {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            background: linear-gradient(135deg, #0052D4, #4364F7, #6FB1FC);
+            overflow: hidden;
+        }
+
+        .glass-container {
+            width: 350px;
+            padding: 30px;
+            background: rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+            text-align: center;
+        }
+
+        h1 {
+            color: #fff;
+            font-size: 24px;
+            font-weight: bold;
+        }
+
+        h3 {
+            color: #ddd;
+            font-size: 14px;
+            margin-bottom: 20px;
+        }
+
+        .input-group {
+            text-align: left;
+            margin-bottom: 15px;
+        }
+
+        .input-group label {
+            display: block;
+            font-weight: bold;
+            font-size: 14px;
+            color: white;
+        }
+
+        .input-group input {
+            width: 100%;
+            padding: 12px;
+            border: none;
+            border-radius: 6px;
+            font-size: 14px;
+            background: rgba(255, 255, 255, 0.3);
+            color: black;
+            outline: none;
+        }
+
+        .btn {
+            width: 100%;
+            background-color: #002D62;
+            color: white;
+            padding: 12px;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        .btn:hover {
+            background-color: #001F48;
+        }
+
+        .otp-btn {
+            width: 100%;
+            background-color: #FF6B6B;
+            color: white;
+            padding: 10px;
+            border: none;
+            border-radius: 6px;
+            font-size: 14px;
+            cursor: pointer;
+            margin-bottom: 10px;
+            transition: background 0.3s;
+        }
+
+        .verify-btn {
+            width: 100%;
+            background-color: #13ec1b;
+            color: white;
+            padding: 10px;
+            border: none;
+            border-radius: 6px;
+            font-size: 14px;
+            cursor: pointer;
+            margin-bottom: 10px;
+            transition: background 0.3s;
+        }
+
+        .otp-btn:hover {
+            background-color: #FF4F4F;
+        }
+
+        .signup-btn {
+            display: block;
+            text-align: center;
+            text-decoration: none;
+            margin-top: 10px;
+            padding: 12px;
+            background-color: transparent;
+            color: white;
+            border: 2px solid white;
+            border-radius: 6px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .signup-btn:hover {
+            background-color: white;
+            color: #002D62;
+        }
+        .error-message {
+        color: red;
+        font-size: 12px;
+        margin-top: 5px;
+        display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="glass-container">
+        <h1>HDIMS - Super Admin</h1>
+        <h3>Secure Health Data Management System</h3>
+
+        <form action="{{ url_for('superadmin_login') }}" method="POST">
+            <div class="input-group">
+                <label for="username">Mail ID</label>
+                <input type="text" id="username" name="username" placeholder="Enter your Mail ID" required>
+                <p id="username-error" class="error-message">{{ errors.get('username', '') }}</p>
+            </div>
+
+            <div class="input-group">
+                <label for="password">Password</label>
+                <input type="password" id="password" name="password" placeholder="Enter your password" required>
+                <p id="password-error" class="error-message">{{ errors.get('password', '') }}</p>
+            </div>
+
+            <button type="button" class="otp-btn" onclick="sendOTP()">Send OTP</button>
+
+            <div class="input-group">
+                <label for="otp">Enter OTP</label>
+                <input type="text" id="otp" name="otp" placeholder="Enter OTP" required>
+                <p id="otp-error" class="error-message">{{ errors.get('otp', '') }}</p>
+                
+            </div>
+            <!--<button type="button" class="verify-btn" onclick="verifyOTP()">Verify OTP</button>-->
+
+
+            <button type="submit" class="btn" onclick="verifyOTP()">Sign in</button>
+            <div style="margin-top: 10px;">
+                <a href="{{ url_for('signup') }}" class="signup-btn">Don't have an account? Sign up</a>
+            </div>
+        </form>
+    </div>
+    <script>
+        function verifyOTP() {
+    const email = document.getElementById("username").value;
+    const otp = document.getElementById("otp").value;
+
+    if (otp === "") {
+        alert("Please enter the OTP.");
+        return;
+    }
+
+    fetch('/verify_otp', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            email: email,
+            otp: otp
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            // ✅ Redirect to dashboard
+            window.location.href = data.redirect || "/superadmin_dashboard";
+        } else {
+            alert(data.message || "Invalid OTP");
+        }
+    })
+    .catch(error => {
+        console.error("Error verifying OTP:", error);
+        alert("An error occurred. Please try again.");
+    });
+}
+
+        function sendOTP() {
+            var username = document.getElementById("username").value;
+            if (username === "") {
+                alert("Please enter your Mail ID before requesting an OTP.");
+                return;
+            }
+            fetch('/send_otp', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email: username })
+            })
+            .then(response => response.json())
+            .then(data => alert(data.message))
+            .catch(error => console.error("Error:", error));
+        }
+
+        // Clear errors on page load
+        document.addEventListener("DOMContentLoaded", function() {
+            // Hide all error messages initially
+            document.getElementById('username-error').style.display = "none";
+            document.getElementById('password-error').style.display = "none";
+            
+            // Only show errors if they exist and page wasn't refreshed
+            if (performance.navigation.type !== performance.navigation.TYPE_RELOAD) {
+                const usernameError = document.getElementById("username-error");
+                const passwordError = document.getElementById("password-error");
+                
+                if (usernameError.textContent.trim() !== "") {
+                    usernameError.style.display = "block";
+                }
+                if (passwordError.textContent.trim() !== "") {
+                    passwordError.style.display = "block";
+                }
+            }
+        });
+//Starts Here for OTP
+        function sendOTP() {
+    var username = document.getElementById("username").value;
+    if (username === "") {
+        alert("Please enter your Mail ID before requesting an OTP.");
+        return;
+    }
+    
+    fetch('/send_otp', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: username })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            alert("OTP sent successfully! Check your email.");
+        } else {
+            alert("Error: " + data.message);
+        }
+    })
+    .catch(error => {
+        console.error("Error:", error);
+        alert("Failed to send OTP. Please try again.");
+    });
+}
+
+// Add this to your existing DOMContentLoaded listener
+document.getElementById("otp").addEventListener("input", function() {
+    document.getElementById("otp-error").style.display = "none";
+}); 
+//ENDS HERE FOR OTP
+    </script>
+</body>
+
+</html>
